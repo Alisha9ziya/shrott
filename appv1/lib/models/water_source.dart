@@ -1,3 +1,5 @@
+import 'package:latlong2/latlong.dart';
+
 class WaterSource {
   final String id;
   final String name;
@@ -7,6 +9,14 @@ class WaterSource {
   final String? sourceType;
   final String? qualityStatus;
   final String? address;
+  final String? village;
+  final String? district;
+  final String? state;
+  final String? notes;
+  final bool? isPotable;
+  final bool? seasonal;
+  final int? usersPerDay;
+  final String? condition;
   final DateTime? createdAt;
   final Map<String, dynamic> raw;
 
@@ -19,9 +29,19 @@ class WaterSource {
     this.sourceType,
     this.qualityStatus,
     this.address,
+    this.village,
+    this.district,
+    this.state,
+    this.notes,
+    this.isPotable,
+    this.seasonal,
+    this.usersPerDay,
+    this.condition,
     this.createdAt,
     this.raw = const {},
   });
+
+  LatLng get point => LatLng(latitude, longitude);
 
   factory WaterSource.fromJson(Map<String, dynamic> json) {
     final location = json['location'];
@@ -46,6 +66,14 @@ class WaterSource {
       sourceType: json['sourceType']?.toString(),
       qualityStatus: json['qualityStatus']?.toString(),
       address: json['address']?.toString(),
+      village: json['village']?.toString(),
+      district: json['district']?.toString(),
+      state: json['state']?.toString(),
+      notes: json['notes']?.toString(),
+      isPotable: json['isPotable'] as bool?,
+      seasonal: json['seasonal'] as bool?,
+      usersPerDay: (json['usersPerDay'] as num?)?.toInt(),
+      condition: json['condition']?.toString(),
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
@@ -61,8 +89,16 @@ class WaterSource {
       'Longitude': longitude.toStringAsFixed(6),
       'pH': ph?.toString() ?? 'N/A',
       'Source Type': sourceType ?? 'N/A',
+      'Village': village ?? 'N/A',
+      'District': district ?? 'N/A',
+      'State': state ?? 'N/A',
+      'Potable': isPotable == null ? 'N/A' : (isPotable! ? 'Yes' : 'No'),
+      'Seasonal': seasonal == null ? 'N/A' : (seasonal! ? 'Yes' : 'No'),
+      'Users / Day': usersPerDay?.toString() ?? 'N/A',
+      'Condition': condition ?? 'N/A',
       'Quality Status': qualityStatus ?? 'N/A',
       'Address': address ?? 'N/A',
+      'Notes': notes ?? 'N/A',
       'Created At': createdAt?.toIso8601String() ?? 'N/A',
     };
   }
