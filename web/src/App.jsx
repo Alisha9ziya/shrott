@@ -8,15 +8,12 @@ const API_BASE =
 const STORAGE_TOKEN = "shrot_auth_token";
 const STORAGE_USER = "shrot_auth_user";
 
-const SOURCE_TYPES = ["well", "borewell", "river", "pond", "spring", "tap"];
+const SOURCE_TYPES = ["river", "pond", "spring"];
 
 const SOURCE_TYPE_COLORS = {
-  well: "#2563eb",
-  borewell: "#2563eb",
   river: "#2563eb",
   pond: "#2563eb",
   spring: "#2563eb",
-  tap: "#2563eb",
 };
 
 const STATES = [
@@ -60,19 +57,6 @@ const LOCAL_WATER_SOURCES = [
   { _id: "local-kandol-gaon-temple-source", name: "Kandol Gaon Temple Source", sourceType: "spring", latitude: 30.166791, longitude: 78.677714, village: "Kandol Gaon", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Spring near temple" },
   { _id: "local-dandapani-water-source", name: "Dandapani Water Source", sourceType: "spring", latitude: 30.172195, longitude: 78.68951, village: "Dandapani", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
   { _id: "local-khanda-water-source-new", name: "Khanda Water Source", sourceType: "spring", latitude: 30.169773, longitude: 78.6871, village: "Khanda", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-
-];
-
-const TEAM_SUPERVISORS = [
-  { name: "Dr. Pushkar Praveen", role: "Principal Investigator" },
-  { name: "Dr. Agya Ram Verma", role: "Co-Principal Investigator" },
-  { name: "Dr. Papendra Kumar", role: "Co-Principal Investigator" },
-];
-
-const TEAM_MEMBERS = [
-  { name: "Abhishek Pokhriyal", role: "Hardware & IoT" },
-  { name: "Alisha Ziya Kavish", role: "Software Development" },
-  { name: "Meet Chauhan", role: "Research & Analysis" },
 ];
 
 const GALLERY_PHOTOS = [
@@ -82,7 +66,8 @@ const GALLERY_PHOTOS = [
   { src: "/unchar-waterfall-a.jpg", title: "Unchar Waterfall Source A", caption: "Unchar, Uttarakhand — natural waterfall, 30.1806° N, 78.6842° E" },
   { src: "/kandol-gaon-temple.jpg", title: "Kandol Gaon Temple Source", caption: "Kandol Gaon, Uttarakhand — natural spring near temple, 30.1668° N, 78.6777° E" },
   { src: "/dandapani-source.jpg", title: "Dandapani Water Source", caption: "Dandapani, Uttarakhand — natural waterfall / spring, 30.1722° N, 78.6895° E" },
-]
+];
+
 const TILE_SIZE = 256;
 const INDIA_CENTER = { latitude: 22.5937, longitude: 78.9629 };
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
@@ -390,10 +375,8 @@ export default function App() {
     return () => { cancelled = true; };
   }, [logout, persistSession, token]);
 
-  useEffect(() => { loadSources(user?.district || ""); }, [loadSources, user?.district]);
+  useEffect(() => { loadSources(""); }, [loadSources]);
 
-  // Re-attach the observer whenever the map is (re)mounted — i.e. when the
-  // splash ends or the user switches between Home and Resources.
   useEffect(() => {
     if (!mapRef.current) return;
     const el = mapRef.current;
@@ -473,7 +456,6 @@ export default function App() {
     e.preventDefault();
     const text = locationQuery.trim();
     if (!text || locationSearching) return;
-
     setLocationSearching(true);
     setLocationError("");
     setLocationResults([]);
@@ -504,7 +486,7 @@ export default function App() {
     if (result.district) {
       setDistrictFilter(result.district);
       setFilterDistrict(result.district);
-      await loadSources(result.district);
+      // Keep the full source collection loaded; the map uses districtFilter for display.
     }
   }
 
@@ -570,7 +552,6 @@ export default function App() {
     e.preventDefault();
     setSourceBusy(true);
     setSourceError("");
-
     const payload = {
       name: sourceForm.name.trim(),
       sourceType: sourceForm.sourceType,
@@ -579,9 +560,7 @@ export default function App() {
       state: user?.state,
       district: user?.district,
     };
-
     if (sourceForm.ph !== "") payload.ph = Number(sourceForm.ph);
-
     try {
       const isEditing = sourceEditor && sourceEditor !== "add";
       await request(
@@ -590,7 +569,7 @@ export default function App() {
       );
       setSourceEditor(null);
       setSelectedPoint(null);
-      await loadSources(districtFilter);
+      await loadSources("");
     } catch (error) {
       setSourceError(cleanError(error, "Could not save source"));
     } finally {
@@ -650,15 +629,23 @@ export default function App() {
   }
 
   function handleMapWheel(e) {
-    e.preventDefault();
-    const rect = e.currentTarget.getBoundingClientRect();
-    zoomMap(e.deltaY < 0 ? 1 : -1, { x: e.clientX - rect.left, y: e.clientY - rect.top });
-  }
+  e.preventDefault();
 
+  const rect = e.currentTarget.getBoundingClientRect();
+  const anchor = {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top,
+  };
+
+  const direction = e.deltaY < 0 ? 1 : -1;
+  const step = Math.min(1, Math.max(0.15, Math.abs(e.deltaY) / 400));
+
+  zoomMap(direction * step, anchor);
+}
   function applyFilters(e) {
     e.preventDefault();
     setDistrictFilter(filterDistrict);
-    loadSources(filterDistrict);
+    // Filters are applied client-side through filteredSources.
   }
 
   function clearFilters() {
@@ -667,62 +654,29 @@ export default function App() {
     setFilterType("");
     setQuery("");
     setDistrictFilter("");
-    loadSources("");
+    // Filters are applied client-side through filteredSources.
   }
 
-  // ─── Splash ─────────────────────────────────────────────────────────────
-  if (booting) {
+  // ─── Filter sidebar (reused in both map and table tabs) ──────────────────
+  function FilterSidebar() {
     return (
-      <div className="splash">
-        <div className="splash-logo">
-          <DropIcon size={52} color="#16a34a" />
-        </div>
-        <h1 className="splash-title">JalSrot</h1>
-        <p className="splash-sub">Water Sources for a Sustainable Tomorrow</p>
-      </div>
-    );
-  }
-
-  // ─── Shared explorer (filters + map + list) used on Home AND Resources ───
-  const explorer = (
-    <div
-      className={`main-layout${activeSection === "home" ? " home-no-map" : ""}`}
-      style={activeSection === "home" ? { gridTemplateColumns: "200px minmax(0, 1fr)" } : undefined}
-    >
-
-      {/* LEFT — Filter Sidebar */}
       <aside className="filter-panel">
         <h3 className="filter-heading">Find Water Sources</h3>
         <form onSubmit={applyFilters}>
           <div className="filter-search-box">
             <SearchIcon />
-            <input
-              className="filter-search-input"
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by name, location..."
-              value={query}
-            />
+            <input className="filter-search-input" onChange={(e) => setQuery(e.target.value)} placeholder="Search by name, location..." value={query} />
           </div>
-
           <div className="filter-group">
             <label className="filter-label">State / UT</label>
-            <select
-              className="filter-select"
-              value={filterState}
-              onChange={(e) => { setFilterState(e.target.value); setFilterDistrict(""); }}
-            >
+            <select className="filter-select" value={filterState} onChange={(e) => { setFilterState(e.target.value); setFilterDistrict(""); }}>
               <option value="">All States</option>
               {STATES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
-
           <div className="filter-group">
             <label className="filter-label">District</label>
-            <select
-              className="filter-select"
-              value={filterDistrict}
-              onChange={(e) => setFilterDistrict(e.target.value)}
-            >
+            <select className="filter-select" value={filterDistrict} onChange={(e) => setFilterDistrict(e.target.value)}>
               <option value="">All Districts</option>
               {filterStateDistricts.map((d) => <option key={d} value={d}>{d}</option>)}
               {filterDistrict && !filterStateDistricts.includes(filterDistrict) && (
@@ -730,204 +684,39 @@ export default function App() {
               )}
             </select>
           </div>
-
           <div className="filter-group">
             <label className="filter-label">Resource Type</label>
             <select className="filter-select" value={filterType} onChange={(e) => setFilterType(e.target.value)}>
               <option value="">All Types</option>
-              {SOURCE_TYPES.map((t) => (
-                <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
-              ))}
+              {SOURCE_TYPES.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
             </select>
           </div>
-
           <button className="filter-search-btn" disabled={sourcesBusy} type="submit">
             <SearchIcon /> {sourcesBusy ? "Searching..." : "Search Sources"}
           </button>
         </form>
-
         <button className="filter-clear-btn" onClick={clearFilters} type="button">↺ Clear Filters</button>
-
         {isLoggedIn && (
           <div className="filter-user-section">
             <div className="filter-user-avatar">{user.email?.[0]?.toUpperCase() || "S"}</div>
             <span className="filter-user-email">{user.email}</span>
-            <button className="filter-add-btn" onClick={() => openAddSource()} type="button">
-              + Add Source
-            </button>
+            <button className="filter-add-btn" onClick={() => openAddSource()} type="button">+ Add Source</button>
           </div>
         )}
       </aside>
+    );
+  }
 
-      {/* CENTER — Map (hidden on the Home page; available in Resources) */}
-      {activeSection !== "home" && (
-        <section className="map-section">
-          <div className="map-bar">
-            <form className="map-search-form" onSubmit={searchLocation}>
-              <div className="map-search-wrap">
-                <SearchIcon />
-                <input
-                  className="map-search-input"
-                  onChange={(e) => setLocationQuery(e.target.value)}
-                  placeholder="Search a location"
-                  value={locationQuery}
-                />
-              </div>
-              <button className="map-search-btn" disabled={locationSearching} type="submit">
-                {locationSearching ? "Searching..." : "Search"}
-              </button>
-            </form>
-            <button className="map-region-btn" onClick={moveToUserRegion} type="button">My region</button>
-            {selectedPoint && (
-              <button className="map-use-btn" onClick={() => openAddSource()} type="button">Use picked point</button>
-            )}
-          </div>
-
-          {(locationResults.length > 0 || locationError) && (
-            <div className="location-results">
-              {locationError && <p className="location-error">{locationError}</p>}
-              {locationResults.map((r) => (
-                <button key={r.id} className="location-result-item" onClick={() => selectLocation(r)} type="button">
-                  <strong>{r.name}</strong>
-                  <span>{r.displayName}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {sourcesError && <div className="error-banner">{sourcesError}</div>}
-
-          <div
-            className="map-canvas"
-            onClick={(e) => { if (dragRef.current?.moved) return; pickMapPoint(e); }}
-            onPointerDown={beginMapDrag}
-            onPointerMove={moveMapDrag}
-            onPointerUp={endMapDrag}
-            onPointerCancel={endMapDrag}
-            onWheel={handleMapWheel}
-            ref={mapRef}
-            role="presentation"
-          >
-            <div className="tile-layer">
-              {tileLayout.tiles.map((tile) => (
-                <img
-                  alt=""
-                  className="map-tile"
-                  draggable="false"
-                  key={tile.key}
-                  src={tile.src}
-                  style={{ left: tile.left, top: tile.top }}
-                />
-              ))}
-            </div>
-
-            {sourcesBusy && <div className="loading-pill">Loading sources…</div>}
-
-            <div className="map-controls">
-              <button onClick={(e) => { e.stopPropagation(); zoomMap(1); }} onPointerDown={(e) => e.stopPropagation()} type="button">+</button>
-              <button onClick={(e) => { e.stopPropagation(); zoomMap(-1); }} onPointerDown={(e) => e.stopPropagation()} type="button">−</button>
-            </div>
-
-            {projectedSearchedPoint && (
-              <button
-                className="map-pin search-pin"
-                onClick={(e) => e.stopPropagation()}
-                style={projectedSearchedPoint}
-                title={searchedPoint?.name}
-                type="button"
-              >
-                <span className="search-dot" />
-              </button>
-            )}
-
-            {projectedSources.map(({ source, left, top }) => {
-              const color = SOURCE_TYPE_COLORS[source.sourceType] || "#6b7280";
-              return (
-                <button
-                  className="map-dot-pin"
-                  key={source._id || source.id || source.name}
-                  onClick={(e) => { e.stopPropagation(); setSelectedSource(source); }}
-                  onPointerDown={(e) => e.stopPropagation()}
-                  style={{ left, top }}
-                  title={source.name}
-                  type="button"
-                >
-                  <span className="dot-circle" style={{ background: color }} />
-                </button>
-              );
-            })}
-
-            {selectedPoint && (
-              <button
-                className="map-pin add-pin"
-                onClick={(e) => { e.stopPropagation(); openAddSource(selectedPoint); }}
-                style={projectedSelectedPoint}
-                type="button"
-              >
-                <span>+</span>
-              </button>
-            )}
-
-            <div className="map-legend">
-              {SOURCE_TYPES
-                .filter((t) => t !== "well" && t !== "borewell")
-                .map((t) => (
-                  <span key={t} className="legend-item">
-                    <span className="legend-dot" style={{ background: SOURCE_TYPE_COLORS[t] }} />
-                    {t.charAt(0).toUpperCase() + t.slice(1)}
-                  </span>
-                ))}
-            </div>
-
-            <a className="map-attribution" href="https://www.openstreetmap.org/copyright" rel="noreferrer" target="_blank">
-              Leaflet | © OpenStreetMap contributors
-            </a>
-          </div>
-        </section>
-      )}
-
-      {/* RIGHT — Source list */}
-      <aside className="source-panel">
-        <div className="source-panel-header">
-          <h3>Water Sources</h3>
-          <span className="source-count">{filteredSources.length} sources</span>
-        </div>
-        <div className="source-list-scroll">
-          {filteredSources.length === 0 && (
-            <p className="empty-state">{sourcesBusy ? "Loading…" : "No water sources found."}</p>
-          )}
-          {filteredSources.map((source) => {
-            const { latitude, longitude } = sourceCoords(source);
-            const color = SOURCE_TYPE_COLORS[source.sourceType] || "#6b7280";
-            return (
-              <button
-                className="source-card"
-                key={source._id || source.id || source.name}
-                onClick={() => focusSource(source)}
-                type="button"
-              >
-                <div className="source-card-dot" style={{ background: color }} />
-                <div className="source-card-body">
-                  <strong className="source-card-name">{source.name || "Unnamed source"}</strong>
-                  <span className="source-card-meta">
-                    <span className="source-badge" style={{ background: `${color}22`, color }}>
-                      {source.sourceType || "source"}
-                    </span>
-                    {source.district || "N/A"}{source.state ? `, ${source.state}` : ""}
-                  </span>
-                  <span className="source-card-coords">
-                    {Number.isFinite(latitude) ? latitude.toFixed(3) : "N/A"},{" "}
-                    {Number.isFinite(longitude) ? longitude.toFixed(3) : "N/A"}
-                  </span>
-                </div>
-                <span className="source-card-chevron">›</span>
-              </button>
-            );
-          })}
-        </div>
-      </aside>
-    </div>
-  );
+  // ─── Splash ─────────────────────────────────────────────────────────────
+  if (booting) {
+    return (
+      <div className="splash">
+        <div className="splash-logo"><DropIcon size={52} color="#1645a3" /></div>
+        <h1 className="splash-title">JalSrot</h1>
+        <p className="splash-sub">Water Sources for a Sustainable Tomorrow</p>
+      </div>
+    );
+  }
 
   // ─── Main render ────────────────────────────────────────────────────────
   return (
@@ -936,17 +725,17 @@ export default function App() {
       {/* ── NAVBAR ──────────────────────────────────────────────────── */}
       <nav className="navbar">
         <div className="navbar-brand">
-          <DropIcon size={28} color="#16a34a" />
-          <span className="brand-name">JalSrot</span>
-        </div>
+  <img src="/logo.png" alt="JalSrot" className="brand-logo" />
+</div>
         <div className="navbar-links">
           {[
             ["home", "Home"],
-            ["about", "About"],
-            ["resources", "Water Sources"],
-            ["contributions", "Research Team"],
-            ["gallery", "Gallery"],
-            ["contact", "Contact & Support"],
+["about", "About"],
+["resources", "Map View"],
+["sources-list", "Water Sources"],
+["contributions", "Research Team"],
+["gallery", "Gallery"],
+["contact", "Contact & Support"],
           ].map(([id, label]) => (
             <button
               className={`nav-link${activeSection === id ? " active" : ""}`}
@@ -1001,259 +790,356 @@ export default function App() {
             </div>
           </section>
 
-          {/* ── HOME PROJECT INFORMATION ───────────────────────────── */}
           <section className="home-project-content">
-
             <div className="home-intro">
-              <span className="home-label">UCOST FUNDED RESEARCH PROJECT</span>
+  <span className="home-label">UCOST FUNDED RESEARCH PROJECT</span>
 
-              <h2>
-                Building a Sustainable and
-                <span> Resilient Water Future</span>
-              </h2>
+  <h2>
+    Building a Sustainable and
+    <span> Resilient Water Future</span>
+  </h2>
 
-              <p>
-                Smart and Sustainable Water Resource Management for Himalayan
-                Communities and Downstream Resilience in Uttarakhand.
-              </p>
+  <p className="home-institute">
+    Smart and Sustainable Water Resource Management for Himalayan
+    Communities and Downstream Resilience in Uttarakhand
+  </p>
 
-              <p className="home-institute">
-                A UCOST-funded research project at G.B. Pant Institute of
-                Engineering & Technology, Pauri Garhwal, Uttarakhand
-              </p>
+  <div className="home-detail-grid">
+    <div className="home-detail-image-wrap">
+      <img
+        src="/home.jpg"
+        alt="Natural water source at Praniya Walla, Uttarakhand"
+        className="home-detail-image"
+      />
+    </div>
 
-              <p>
-                The “Smart and Sustainable Water Resource Management for
-                Himalayan Communities and Downstream Resilience in
-                Uttarakhand” is a one-year research project sanctioned by
-                the Uttarakhand State Council for Science and Technology
-                (UCOST), Government of Uttarakhand.
-              </p>
+    <div className="home-detail-copy">
+      <p>
+        A one-year research project focused on the sustainable management of
+        water resources and the resilience of Himalayan communities and
+        downstream areas in Uttarakhand.
+      </p>
 
-              <p>
-                The project is being implemented at G.B. Pant Institute of
-                Engineering & Technology, Pauri Garhwal, Uttarakhand, under
-                the leadership of Dr. Pushkar Praveen, Principal
-                Investigator, with Dr. Agya Ram Verma and Dr. Papendra
-                Kumar serving as Co-Principal Investigators.
-              </p>
+      <p>
+        The project is being carried out at G.B. Pant Institute of Engineering
+        &amp; Technology, Pauri Garhwal, with a focus on understanding,
+        documenting and supporting water resources in the region.
+      </p>
 
-              <p>
-                The project focuses on the theme of smart and sustainable
-                water resource management, with particular emphasis on
-                Himalayan communities and downstream resilience in
-                Uttarakhand.
-              </p>
+      <p>
+        The work brings together field information, digital mapping and
+        technology-based approaches to support better understanding and
+        management of local water resources.
+      </p>
 
-              <div className="home-actions">
-                <button
-                  className="home-primary-btn"
-                  onClick={() => goToSection("resources")}
-                  type="button"
-                >
-                  Explore Water Sources →
-                </button>
+      <div className="home-actions">
+        <button
+          className="home-primary-btn"
+          onClick={() => goToSection("resources")}
+          type="button"
+        >
+          Explore Water Sources on Map →
+        </button>
 
-                <button
-                  className="home-secondary-btn"
-                  onClick={() => goToSection("about")}
-                  type="button"
-                >
-                  Learn About the Project
-                </button>
-              </div>
-            </div>
+        <button
+          className="home-secondary-btn"
+          onClick={() => goToSection("about")}
+          type="button"
+        >
+          Learn About the Project
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
             <div className="home-focus-section">
               <div className="home-section-heading">
                 <span>OUR FOCUS</span>
                 <h2>Working Towards Water Resilience</h2>
-                <p>
-                  Our project focuses on smart management, sustainability and
-                  resilience of Himalayan water resources.
-                </p>
+                <p>Our project focuses on smart management, sustainability and resilience of Himalayan water resources.</p>
               </div>
-
               <div className="home-focus-grid">
-
                 <div className="home-focus-card">
                   <div className="home-card-icon">💧</div>
                   <h3>Smart Water Resource Management</h3>
-                  <p>
-                    Exploring approaches toward smarter management of water
-                    resources in the Himalayan context.
-                  </p>
+                  <p>Exploring approaches toward smarter management of water resources in the Himalayan context.</p>
                 </div>
-
                 <div className="home-focus-card">
                   <div className="home-card-icon">🌱</div>
                   <h3>Sustainable Water Resources</h3>
-                  <p>
-                    Promoting a long-term perspective on the sustainable
-                    management of water resources.
-                  </p>
+                  <p>Promoting a long-term perspective on the sustainable management of water resources.</p>
                 </div>
-
                 <div className="home-focus-card">
                   <div className="home-card-icon">🏔️</div>
                   <h3>Himalayan Communities</h3>
-                  <p>
-                    Recognizing the importance of sustainable water resources
-                    for communities in the Himalayan region.
-                  </p>
+                  <p>Recognizing the importance of sustainable water resources for communities in the Himalayan region.</p>
                 </div>
-
                 <div className="home-focus-card">
                   <div className="home-card-icon">🌊</div>
                   <h3>Downstream Resilience</h3>
-                  <p>
-                    Considering the broader importance of water-resource
-                    resilience for downstream regions.
-                  </p>
+                  <p>Considering the broader importance of water-resource resilience for downstream regions.</p>
                 </div>
-
               </div>
             </div>
 
             <div className="home-bottom-banner">
               <div>
                 <h3>Discover. Document. Protect.</h3>
-                <p>
-                  Help build awareness and support sustainable water resource
-                  management.
-                </p>
+                <p>Help build awareness and support sustainable water resource management.</p>
               </div>
-
-              <button
-                className="home-primary-btn"
-                onClick={() => goToSection("resources")}
-                type="button"
-              >
-                View Resources →
+              <button className="home-primary-btn" onClick={() => goToSection("sources-list")} type="button">
+                View Water Sources →
               </button>
             </div>
-
           </section>
         </div>
       )}
 
-      {/* ── Water Sources ─────────────────────────────── */}
+      {/* ── MAP VIEW ─────────────────────────────────────────────── */}
       {activeSection === "resources" && (
-        <div className="resources-fullview" id="resources">
-          <div className="resources-page-header">
-            <h2 className="resources-page-title">Water Sources</h2>
-            <span className="resources-page-count">{sources.length} sources</span>
-          </div>
-          {explorer}
-        </div>
+        <div className="main-layout resources-map-layout">
+              <FilterSidebar />
+              <section className="map-section">
+                <div className="map-bar">
+                  <form className="map-search-form" onSubmit={searchLocation}>
+                    <div className="map-search-wrap">
+                      <SearchIcon />
+                      <input className="map-search-input" onChange={(e) => setLocationQuery(e.target.value)} placeholder="Search a location" value={locationQuery} />
+                    </div>
+                    <button className="map-search-btn" disabled={locationSearching} type="submit">
+                      {locationSearching ? "Searching..." : "Search"}
+                    </button>
+                  </form>
+                  <button className="map-region-btn" onClick={moveToUserRegion} type="button">My region</button>
+                  {selectedPoint && <button className="map-use-btn" onClick={() => openAddSource()} type="button">Use picked point</button>}
+                </div>
+
+                {(locationResults.length > 0 || locationError) && (
+                  <div className="location-results">
+                    {locationError && <p className="location-error">{locationError}</p>}
+                    {locationResults.map((r) => (
+                      <button key={r.id} className="location-result-item" onClick={() => selectLocation(r)} type="button">
+                        <strong>{r.name}</strong><span>{r.displayName}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {sourcesError && <div className="error-banner">{sourcesError}</div>}
+
+                <div
+                  className="map-canvas"
+                  onClick={(e) => { if (dragRef.current?.moved) return; pickMapPoint(e); }}
+                  onPointerDown={beginMapDrag} onPointerMove={moveMapDrag}
+                  onPointerUp={endMapDrag} onPointerCancel={endMapDrag}
+                  onWheel={handleMapWheel} ref={mapRef} role="presentation"
+                >
+                  <div className="tile-layer">
+                    {tileLayout.tiles.map((tile) => (
+                      <img alt="" className="map-tile" draggable="false" key={tile.key} src={tile.src} style={{ left: tile.left, top: tile.top }} />
+                    ))}
+                  </div>
+                  {sourcesBusy && <div className="loading-pill">Loading sources…</div>}
+                  <div className="map-controls">
+                    <button onClick={(e) => { e.stopPropagation(); zoomMap(1); }} onPointerDown={(e) => e.stopPropagation()} type="button">+</button>
+                    <button onClick={(e) => { e.stopPropagation(); zoomMap(-1); }} onPointerDown={(e) => e.stopPropagation()} type="button">−</button>
+                  </div>
+                  {projectedSearchedPoint && (
+                    <button className="map-pin search-pin" onClick={(e) => e.stopPropagation()} style={projectedSearchedPoint} title={searchedPoint?.name} type="button">
+                      <span className="search-dot" />
+                    </button>
+                  )}
+                  {projectedSources.map(({ source, left, top }) => {
+                    const color = SOURCE_TYPE_COLORS[source.sourceType] || "#6b7280";
+                    return (
+                      <button className="map-dot-pin" key={source._id || source.id || source.name}
+                        onClick={(e) => { e.stopPropagation(); setSelectedSource(source); }}
+                        onPointerDown={(e) => e.stopPropagation()} style={{ left, top }} title={source.name} type="button">
+                        <span className="dot-circle" style={{ background: color }} />
+                      </button>
+                    );
+                  })}
+                  {selectedPoint && (
+                    <button className="map-pin add-pin" onClick={(e) => { e.stopPropagation(); openAddSource(selectedPoint); }} style={projectedSelectedPoint} type="button">
+                      <span>+</span>
+                    </button>
+                  )}
+                  <div className="map-legend">
+                    {SOURCE_TYPES.filter((t) => t !== "well" && t !== "borewell").map((t) => (
+                      <span key={t} className="legend-item">
+                        <span className="legend-dot" style={{ background: SOURCE_TYPE_COLORS[t] }} />
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                      </span>
+                    ))}
+                  </div>
+                  <a className="map-attribution" href="https://www.openstreetmap.org/copyright" rel="noreferrer" target="_blank">
+                    Leaflet | © OpenStreetMap contributors
+                  </a>
+                </div>
+              </section>
+            </div>
       )}
 
+      {/* ── WATER SOURCES ───────────────────────────────────────── */}
+      {activeSection === "sources-list" && (
+        <section className="page-section view-page" id="sources-list">
+          <div className="sources-list-header">
+            <h2 className="section-heading">Water Sources</h2>
+            <p className="section-sub">
+              Explore all documented water sources and view their complete details.
+            </p>
+          </div>
+
+          <div className="sources-table-fullview">
+            <div className="sources-table-view">
+              <div className="sources-table-wrap">
+                <table className="sources-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Type</th>
+                      <th>Village</th>
+                      <th>District</th>
+                      <th>State</th>
+                      <th>Latitude</th>
+                      <th>Longitude</th>
+                      <th>Notes</th>
+                      <th>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sources.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={10}
+                          style={{
+                            textAlign: "center",
+                            color: "var(--text-2)",
+                            padding: "24px",
+                          }}
+                        >
+                          {sourcesBusy ? "Loading sources..." : "No water sources found."}
+                        </td>
+                      </tr>
+                    ) : (
+                      sources.map((source, i) => {
+                        const { latitude, longitude } = sourceCoords(source);
+                        const color =
+                          SOURCE_TYPE_COLORS[source.sourceType] || "#6b7280";
+
+                        return (
+                          <tr key={source._id || source.id || source.name}>
+                            <td style={{ color: "var(--text-2)", fontWeight: 500 }}>
+                              {i + 1}
+                            </td>
+                            <td>
+                              <strong style={{ color: "var(--text)" }}>
+                                {source.name || "Unnamed"}
+                              </strong>
+                            </td>
+                            <td>
+                              <span
+                                className="src-type-pill"
+                                style={{
+                                  background: `${color}22`,
+                                  color,
+                                }}
+                              >
+                                {source.sourceType || "—"}
+                              </span>
+                            </td>
+                            <td>{source.village || "—"}</td>
+                            <td>{source.district || "—"}</td>
+                            <td>{source.state || "—"}</td>
+                            <td style={{ fontFamily: "monospace", fontSize: 12 }}>
+                              {Number.isFinite(latitude) ? latitude.toFixed(5) : "—"}
+                            </td>
+                            <td style={{ fontFamily: "monospace", fontSize: 12 }}>
+                              {Number.isFinite(longitude) ? longitude.toFixed(5) : "—"}
+                            </td>
+                            <td style={{ color: "var(--text-2)" }}>
+                              {source.notes || "—"}
+                            </td>
+                            <td>
+                              <button
+                                className="source-details-btn"
+                                onClick={() => setSelectedSource(source)}
+                                type="button"
+                              >
+                                View Details →
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
       {/* ── ABOUT ─────────────────────────────────────────────── */}
       {activeSection === "about" && (
         <section className="page-section view-page" id="about">
-
-          <h2 className="section-heading">
-            About the Project
-          </h2>
-
+          <h2 className="section-heading">About the Project</h2>
           <p className="section-sub">
             Water resources in the Himalayan region are closely connected
             with the well-being of communities as well as downstream areas.
             The sanctioned project,{" "}
-            <strong>
-              “Smart and Sustainable Water Resource Management for
-              Himalayan Communities and Downstream Resilience in Uttarakhand,”
-            </strong>{" "}
+            <strong>&ldquo;Smart and Sustainable Water Resource Management for
+            Himalayan Communities and Downstream Resilience in Uttarakhand,&rdquo;</strong>{" "}
             focuses on managing water resources sustainably while
-            considering the needs of Himalayan communities and downstream
-            resilience.
+            considering the needs of Himalayan communities and downstream resilience.
           </p>
-
           <p className="section-sub">
             The project is being undertaken at{" "}
-            <strong>
-              G.B. Pant Institute of Engineering & Technology,
-              Pauri Garhwal, Uttarakhand,
-            </strong>{" "}
-            with financial support from{" "}
-            <strong>UCOST, Government of Uttarakhand.</strong>
+            <strong>G.B. Pant Institute of Engineering &amp; Technology, Pauri Garhwal, Uttarakhand,</strong>{" "}
+            with financial support from <strong>UCOST, Government of Uttarakhand.</strong>
           </p>
-
           <p className="section-sub">
-            The project is led by{" "}
-            <strong>
-              Dr. Pushkar Praveen, Principal Investigator,
-            </strong>{" "}
-            with <strong>Dr. Agya Ram Verma</strong> and{" "}
-            <strong>Dr. Papendra Kumar</strong> serving as{" "}
+            The project is led by <strong>Dr. Pushkar Praveen, Principal Investigator,</strong>{" "}
+            with <strong>Dr. Agya Ram Verma</strong> and <strong>Dr. Papendra Kumar</strong> serving as{" "}
             <strong>Co-Principal Investigators.</strong>
           </p>
-
-          {/* PROJECT VISION */}
-          <h3 className="about-heading">
-            Project Vision
-          </h3>
-
+          <h3 className="about-heading">Project Vision</h3>
           <p className="section-sub">
             To support sustainable and smart water resource management
             approaches that contribute to resilient Himalayan communities
-            and strengthen downstream water-resource resilience in
-            Uttarakhand.
+            and strengthen downstream water-resource resilience in Uttarakhand.
           </p>
-
-          {/* WHY THIS PROJECT MATTERS */}
-          <h3 className="about-heading">
-            Why This Project Matters
-          </h3>
-
-          <p className="section-sub">
-            The project title itself identifies two interconnected areas of concern
-          </p>
-
+          <h3 className="about-heading">Why This Project Matters</h3>
+          <p className="section-sub">The project title itself identifies two interconnected areas of concern</p>
           <div className="about-info-block">
             <h4>Himalayan Communities</h4>
             <p className="section-sub">
-              Water resources are important for life and development
-              in Himalayan communities. Sustainable management of these
-              resources supports community resilience.
+              Water resources are important for life and development in Himalayan communities.
+              Sustainable management of these resources supports community resilience.
             </p>
           </div>
-
           <div className="about-info-block">
             <h4>Downstream Resilience</h4>
             <p className="section-sub">
-              Water-resource conditions in Himalayan regions have impliacations beyond the immediate communities.The project consequently considers <b>downstream resillience</b> as part of its broader focus
-              areas beyond immediate communities. The project therefore
-              considers downstream resilience.
+              Water-resource conditions in Himalayan regions have implications beyond immediate communities.
+              The project therefore considers <b>downstream resilience</b> as part of its broader focus areas.
             </p>
           </div>
-
           <div className="about-info-block">
-            <h4>Smart & Sustainable Management</h4>
+            <h4>Smart &amp; Sustainable Management</h4>
             <p className="section-sub">
-             The project specifically emphasizes<b>“Smart and Sustainable Water Resource Management,”</b>  indicating a focus on approaches that combine improved management with long-term sustainability
+              The project specifically emphasizes <b>&ldquo;Smart and Sustainable Water Resource Management,&rdquo;</b>{" "}
+              indicating a focus on approaches that combine improved management with long-term sustainability.
             </p>
           </div>
-
-          {/* PROJECT OBJECTIVES */}
           <div className="about-objectives-section">
-            <h3 className="about-heading">
-              Project Objectives
-            </h3>
-
+            <h3 className="about-heading">Project Objectives</h3>
             <ul className="about-objectives">
-              <li>
-                To explore smart approaches for improved water resource
-                management.
-              </li>
-
-              <li>
-                To consider the water-resource needs and resilience of
-                Himalayan communities.
-              </li>
+              <li>To explore smart approaches for improved water resource management.</li>
+              <li>To consider the water-resource needs and resilience of Himalayan communities.</li>
             </ul>
           </div>
-
         </section>
       )}
 
@@ -1261,25 +1147,14 @@ export default function App() {
       {activeSection === "gallery" && (
         <section className="page-section alt view-page" id="gallery">
           <h2 className="section-heading">Image &amp; Video Gallery</h2>
-
-          <p className="section-sub">
-            Photos and videos captured on-site while surveying water sources in
-            Pauri Garhwal.
-          </p>
-
+          <p className="section-sub">Photos and videos captured on-site while surveying water sources in Pauri Garhwal.</p>
           <div className="gallery-grid">
             {GALLERY_PHOTOS.map((photo) => (
               <div className="gallery-card" key={photo.src}>
-                <button
-                  className="gallery-image-button"
-                  onClick={() => setGalleryZoom(photo)}
-                  aria-label={`View ${photo.title}`}
-                  type="button"
-                >
+                <button className="gallery-image-button" onClick={() => setGalleryZoom(photo)} aria-label={`View ${photo.title}`} type="button">
                   <img src={photo.src} alt={photo.title} className="gallery-photo" loading="lazy" />
                   <span className="gallery-zoom-hint">🔍 Click to view</span>
                 </button>
-
                 <div className="gallery-caption">
                   <strong>{photo.title}</strong>
                   <span>{photo.caption}</span>
@@ -1287,7 +1162,6 @@ export default function App() {
               </div>
             ))}
           </div>
-
           <div className="gallery-grid gallery-video-grid">
             <div className="gallery-card">
               <div className="gallery-video-wrapper">
@@ -1301,7 +1175,6 @@ export default function App() {
                 <span>On-site footage of a natural water source in Pauri Garhwal.</span>
               </div>
             </div>
-
             <div className="gallery-card">
               <div className="gallery-video-wrapper">
                 <video className="gallery-video" controls preload="metadata" playsInline>
@@ -1315,7 +1188,6 @@ export default function App() {
               </div>
             </div>
           </div>
-
           {galleryZoom && (
             <div className="gallery-lightbox" onClick={() => setGalleryZoom(null)}>
               <button className="gallery-close" onClick={() => setGalleryZoom(null)} type="button">✕</button>
@@ -1334,192 +1206,94 @@ export default function App() {
       {/* ── CONTRIBUTIONS ─────────────────────────────────────── */}
       {activeSection === "contributions" && (
         <section className="page-section view-page contributions-page" id="contributions">
+          <h2 className="section-heading">Research Team</h2>
+          <p className="section-sub">The project team working towards smart and sustainable water resource management in Uttarakhand.</p>
 
-          <h2 className="section-heading">
-            Research Team
-          </h2>
-
-          <p className="section-sub">
-            The project team working towards smart and sustainable water
-            resource management in Uttarakhand.
-          </p>
-
-          {/* INSTITUTE LEADERSHIP */}
-          <h3 className="contribution-heading">
-            Institute Leadership
-          </h3>
-
+          <h3 className="contribution-heading">Institute Leadership</h3>
           <div className="leadership-grid">
-
             <div className="leadership-card">
-              <div className="leadership-image">
-                <img
-                  src="/director-vk-banga.jpg"
-                  alt="Prof. Dr. V. K. Banga"
-                />
-              </div>
-
+              <div className="leadership-image"><img src="/director-vk-banga.jpg" alt="Prof. Dr. V. K. Banga" /></div>
               <div className="leadership-details">
                 <h4>Prof. (Dr.) V. K. Banga</h4>
                 <p>Director</p>
-                <p>
-                  Govind Ballabh Pant Institute of Engineering and
-                  Technology, Pauri Uttarakhand
-                </p>
+                <p>Govind Ballabh Pant Institute of Engineering and Technology, Pauri Uttarakhand</p>
               </div>
             </div>
-
             <div className="leadership-card">
-              <div className="leadership-image">
-                <img
-                  src="/dean-mamta-baunthiyal.jpg"
-                  alt="Dr. Mamta Baunthiyal"
-                />
-              </div>
-
+              <div className="leadership-image"><img src="/dean-mamta-baunthiyal.jpg" alt="Dr. Mamta Baunthiyal" /></div>
               <div className="leadership-details">
                 <h4>Dr. Mamta Baunthiyal</h4>
-                <p>Dean Research & Development</p>
-                <p>
-                  Govind Ballabh Pant Institute of Engineering and
-                  Technology, Pauri Uttarakhand
-                </p>
+                <p>Dean Research &amp; Development</p>
+                <p>Govind Ballabh Pant Institute of Engineering and Technology, Pauri Uttarakhand</p>
               </div>
             </div>
-
           </div>
 
-          {/* PROJECT TEAM */}
-          <h3 className="contribution-heading">
-            Principal Investigators & Project Leadership
-          </h3>
-
+          <h3 className="contribution-heading">Principal Investigators &amp; Project Leadership</h3>
           <div className="contribution-team-list">
-
             <div className="contribution-member">
-              <span className="member-role">
-                Principal Investigator
-              </span>
-
+              <span className="member-role">Principal Investigator</span>
               <strong>Dr. Pushkar Praveen</strong>
-
               <span>Assistant Professor</span>
-              <span>
-                Department of Electronics & Communication Engineering
-              </span>
-              <span>
-                G.B. Pant Institute of Engineering & Technology, Uttarakhand
-              </span>
+              <span>Department of Electronics &amp; Communication Engineering</span>
+              <span>G.B. Pant Institute of Engineering &amp; Technology, Uttarakhand</span>
             </div>
-
             <div className="contribution-member">
-              <span className="member-role">
-                Co-Principal Investigator
-              </span>
-
+              <span className="member-role">Co-Principal Investigator</span>
               <strong>Dr. Agya Ram Verma</strong>
-
               <span>Assistant Professor</span>
-              <span>
-                Department of Electronics & Communication Engineering
-              </span>
-              <span>
-                G.B. Pant Institute of Engineering & Technology, Uttarakhand
-              </span>
+              <span>Department of Electronics &amp; Communication Engineering</span>
+              <span>G.B. Pant Institute of Engineering &amp; Technology, Uttarakhand</span>
             </div>
-
             <div className="contribution-member">
-              <span className="member-role">
-                Co-Principal Investigator
-              </span>
-
+              <span className="member-role">Co-Principal Investigator</span>
               <strong>Dr. Papendra Kumar</strong>
-
               <span>Assistant Professor</span>
-              <span>
-                Department of Computer Science & Engineering
-              </span>
-              <span>
-                G.B. Pant Institute of Engineering & Technology, Uttarakhand
-              </span>
+              <span>Department of Computer Science &amp; Engineering</span>
+              <span>G.B. Pant Institute of Engineering &amp; Technology, Uttarakhand</span>
             </div>
+          </div>
 
-                    </div>
-
-          {/* IMPLEMENTATION TEAM */}
-          <h3 className="contribution-heading">
-            Project Implementation Team
-          </h3>
-
+          <h3 className="contribution-heading">Project Implementation Team</h3>
           <div className="contribution-team-list">
-
             <div className="contribution-member">
-              <span className="member-role">
-                Hardware &amp; IoT
-              </span>
               <strong>Abhishek Pokhriyal</strong>
               <span>G.B. Pant Institute of Engineering &amp; Technology, Uttarakhand</span>
             </div>
-
             <div className="contribution-member">
-              <span className="member-role">
-                Software Development
-              </span>
               <strong>Alisha Ziya Kavish</strong>
               <span>G.B. Pant Institute of Engineering &amp; Technology, Uttarakhand</span>
             </div>
-
             <div className="contribution-member">
-              <span className="member-role">
-                Research &amp; Analysis
-              </span>
-              <strong>Meet Chauhan</strong>
+                            <strong>Meet Chauhan</strong>
               <span>G.B. Pant Institute of Engineering &amp; Technology, Uttarakhand</span>
             </div>
-
           </div>
-
         </section>
       )}
 
-  
       {/* ── CONTACT & SUPPORT ─────────────────────────────────────── */}
       {activeSection === "contact" && (
         <section className="page-section alt view-page" id="contact">
           <h2 className="section-heading">Contact &amp; Support</h2>
-
-          <p className="section-sub">
-            Questions, feedback, or want to contribute data? Get in touch with us
-            using the contact details below.
-          </p>
-
+          <p className="section-sub">Questions, feedback, or want to contribute data? Get in touch with us using the contact details below.</p>
           <div className="info-card-row" style={{ marginBottom: 28 }}>
             <div className="info-card">
               <strong>Report an issue</strong>
               <p>
-                Found incorrect data, a bug, or a problem with the website?
-                Email us at{" "}
-                <a href="mailto:Jalsrotuk@gmail.com">
-                 Jalsrotuk@gmail.com
-                </a>{" "}
-                with a short description of the issue. A screenshot can also help
-                us understand the problem.
+                Found incorrect data, a bug, or a problem with the website? Email us at{" "}
+                <a href="mailto:Jalsrotuk@gmail.com">Jalsrotuk@gmail.com</a>{" "}
+                with a short description of the issue. A screenshot can also help us understand the problem.
               </p>
             </div>
           </div>
-
-          <h3 className="section-heading" style={{ fontSize: "1.05rem" }}>
-            How to contribute
-          </h3>
-
+          <h3 className="section-heading" style={{ fontSize: "1.05rem" }}>How to contribute</h3>
           <div className="info-card-row">
             <div className="info-card">
               <strong>Share field photos</strong>
               <p>
-                Have photograph of a water-source? Email them to{" "}
-                <a href="mailto:Jalsrotuk@gmail.com">
-                  Jalsrotuk@gmail.com
-                </a>{" "}
+                Have a photograph of a water source? Email them to{" "}
+                <a href="mailto:Jalsrotuk@gmail.com">Jalsrotuk@gmail.com</a>{" "}
                 along with the source name, location or any useful field details.
               </p>
             </div>
@@ -1633,9 +1407,7 @@ export default function App() {
               onClick={() => setAuthMode(authMode === "register" ? "login" : "register")}
               type="button"
             >
-              {authMode === "register"
-                ? "Already have an account? Sign in"
-                : "New here? Create an account"}
+              {authMode === "register" ? "Already have an account? Sign in" : "New here? Create an account"}
             </button>
           </form>
         </div>
