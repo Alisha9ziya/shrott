@@ -39,35 +39,69 @@ const DISTRICTS = {
 const EMPTY_SOURCE_FORM = { name: "", sourceType: "well", latitude: "", longitude: "", ph: "" };
 
 const LOCAL_WATER_SOURCES = [
-  { _id: "local-pauri-water-source", name: "Pauri Water Source", sourceType: "spring", latitude: 30.120913, longitude: 78.790788, village: "Pauri", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-  { _id: "local-toli-water-source", name: "Toli Water Source", sourceType: "spring", latitude: 30.037434, longitude: 78.792795, village: "Toli", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-  { _id: "local-unchar-water-source-1", name: "Unchar Water Source 1", sourceType: "spring", latitude: 30.17661, longitude: 78.690693, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall" },
-  { _id: "local-unchar-water-source-2", name: "Unchar Water Source 2", sourceType: "spring", latitude: 30.17875, longitude: 78.688112, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall" },
-  { _id: "local-unchar-water-source-3", name: "Unchar Water Source 3", sourceType: "spring", latitude: 30.180508, longitude: 78.684133, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall" },
-  { _id: "local-khanda-water-source-1", name: "Khanda Water Source 1", sourceType: "spring", latitude: 30.16827, longitude: 78.684792, village: "Khanda", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-  { _id: "local-kandol-gaon-water-source", name: "Kandol Gaon Water Source", sourceType: "spring", latitude: 30.166023, longitude: 78.676615, village: "Kandol Gaon", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-  { _id: "local-kanda-water-source-2", name: "Kanda Water Source 2", sourceType: "spring", latitude: 30.166678, longitude: 78.673322, village: "Kanda", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-  { _id: "local-qurali-water-source", name: "Qurali Water Source", sourceType: "spring", latitude: 30.151617, longitude: 78.619135, village: "Qurali", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-  { _id: "local-ujiyari-water-source", name: "Ujiyari Water Source", sourceType: "spring", latitude: 30.156012, longitude: 78.739787, village: "Ujiyari", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Spring / Waterfall" },
-  { _id: "local-khar-kota-water-source", name: "Khar Kota Water Source", sourceType: "spring", latitude: 30.13605, longitude: 78.77257, village: "Pauri", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-  { _id: "local-praniya-walla-water-source", name: "Praniya Walla Water Source", sourceType: "spring", latitude: 30.190959, longitude: 78.684719, village: "Praniya Walla", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-  { _id: "local-unchar-waterfall-a", name: "Unchar Waterfall Source A", sourceType: "spring", latitude: 30.180637, longitude: 78.684167, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-  { _id: "local-unchar-spring-b", name: "Unchar Spring Source B", sourceType: "spring", latitude: 30.178951, longitude: 78.687563, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-  { _id: "local-unchar-waterfall-c", name: "Unchar Waterfall Source C", sourceType: "spring", latitude: 30.176563, longitude: 78.690818, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall" },
-  { _id: "local-kandol-gaon-temple-source", name: "Kandol Gaon Temple Source", sourceType: "spring", latitude: 30.166791, longitude: 78.677714, village: "Kandol Gaon", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Spring near temple" },
-  { _id: "local-dandapani-water-source", name: "Dandapani Water Source", sourceType: "spring", latitude: 30.172195, longitude: 78.68951, village: "Dandapani", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-  { _id: "local-khanda-water-source-new", name: "Khanda Water Source", sourceType: "spring", latitude: 30.169773, longitude: 78.6871, village: "Khanda", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Natural Waterfall / Spring" },
-];
+  { _id: "local-unchar-1", name: "Unchar Waterfall (Upper Point)", sourceType: "spring", latitude: 30.176563, longitude: 78.690818, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Waterfall (Roadside, Upper Point)", tds: 50, ec: 100, turbidity: 4, alkalinity: 56, acidity: 16, hardness: 62, chlorides: 28 },
+  { _id: "local-unchar-2", name: "Unchar Waterfall (Plus Code)", sourceType: "spring", latitude: 30.178665, longitude: 78.688050, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Waterfall (Plus Code 5MHP+QM3)", tds: 71, ec: 142, turbidity: 1, alkalinity: 86, acidity: 16, hardness: 92, chlorides: 48 },
+  { _id: "local-unchar-3", name: "Unchar Spring / Water Channel", sourceType: "spring", latitude: 30.178951, longitude: 78.687563, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Spring / Water Channel", tds: 71, ec: 142, turbidity: 6, alkalinity: 88, acidity: 16, hardness: 96, chlorides: 72 },
+  { _id: "local-unchar-4", name: "Unchar Water Channel (Lower Point)", sourceType: "spring", latitude: 30.180602, longitude: 78.684180, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Water Channel (Roadside, Lower Point)", tds: 60, ec: 120, turbidity: 8, alkalinity: 88, acidity: 32, hardness: 84, chlorides: 48 },
+  { _id: "local-khanda", name: "Khanda Vegetation / Slope Site", sourceType: "spring", latitude: 30.169773, longitude: 78.687100, village: "Khanda", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Khanda – Vegetation / Slope Site", tds: 66, ec: 132, turbidity: 2, alkalinity: 68, acidity: 12, hardness: 68, chlorides: 32 },
+  { _id: "local-kandol-gaon", name: "Kandol Gaon Stone Water Spout", sourceType: "spring", latitude: 30.165980, longitude: 78.676868, village: "Kandol Gaon", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Kandol Gaon – Stone Water Spout", tds: 55, ec: 110, turbidity: 3, alkalinity: 68, acidity: 16, hardness: 66, chlorides: 44 },
+  { _id: "local-dandapani", name: "Dandapani Forest Stream", sourceType: "spring", latitude: 30.172195, longitude: 78.689510, village: "Dandapani", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Dandapani – Forest Stream Site" },
+  { _id: "local-khar-kota", name: "Khar Kota Forest Stream", sourceType: "spring", latitude: 30.136138, longitude: 78.772665, village: "Khar Kota", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Khar kota - Forest stream site", tds: 14, ec: 28, turbidity: 2, alkalinity: 16, acidity: 28, hardness: 16, chlorides: 20 },
+  { _id: "local-pauri", name: "Pauri Road Side Stream (Buakhal)", sourceType: "spring", latitude: 30.120957, longitude: 78.790782, village: "Pauri", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Pauri – road side stream", tds: 27, ec: 54, turbidity: 5, alkalinity: 36, acidity: 32, hardness: 30, chlorides: 40 },
+  { _id: "local-toli", name: "Toli Road Side Stream", sourceType: "spring", latitude: 30.037434, longitude: 78.792795, village: "Toli", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Toli – road side stream" },
+  { _id: "local-unchar-fs1", name: "Unchar Forest Stream 1", sourceType: "spring", latitude: 30.180508, longitude: 78.684133, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Unchar – forest stream site 1" },
+  { _id: "local-unchar-fs2", name: "Unchar Forest Stream 2", sourceType: "spring", latitude: 30.17875, longitude: 78.688112, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Unchar – forest stream site 2" },
+  { _id: "local-unchar-fs3", name: "Unchar Forest Stream 3", sourceType: "spring", latitude: 30.17661, longitude: 78.690693, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Unchar – forest stream site 3", tds: 72, ec: 144, turbidity: 5, alkalinity: 74, acidity: 20, hardness: 88, chlorides: 52 },
+  { _id: "local-qurali", name: "Qurali Forest Stream", sourceType: "spring", latitude: 30.151617, longitude: 78.619135, village: "Qurali", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Qurali – forest stream site" },
+  { _id: "local-ujiyari", name: "Ujiyari Stream", sourceType: "spring", latitude: 30.156012, longitude: 78.739787, village: "Ujiyari", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Ujiyari – stream site" },
+  { _id: "local-bhuvneshwari-1", name: "Bhuvneshwari Mandir Road-01", sourceType: "spring", latitude: null, longitude: null, district: "Pauri Garhwal", state: "Uttarakhand", tds: 44, ec: 88, turbidity: 1, alkalinity: 54, acidity: 20, hardness: 54, chlorides: 12 },
+  { _id: "local-bhuvneshwari-2", name: "Bhuvneshwari Mandir Road-02", sourceType: "spring", latitude: null, longitude: null, district: "Pauri Garhwal", state: "Uttarakhand", tds: 33, ec: 66, turbidity: 0, alkalinity: 38, acidity: 12, hardness: 36, chlorides: 16 },
+  { _id: "local-lwali", name: "Lwali Village (DhiruVillage)", sourceType: "spring", latitude: null, longitude: null, district: "Pauri Garhwal", state: "Uttarakhand", tds: 62, ec: 124, turbidity: 0, alkalinity: 50, acidity: 16, hardness: 72, chlorides: 28 },
+  { _id: "local-praniya-walla", name: "Praniya Walla (Pravin Village)", sourceType: "spring", latitude: 30.1909, longitude: 78.6847, village: "Praniya Walla", district: "Pauri Garhwal", state: "Uttarakhand", tds: 63, ec: 126, turbidity: 1, alkalinity: 70, acidity: 16, hardness: 84, chlorides: 28 },
+  { _id: "local-unchar-5", name: "Unchar Waterfall (Near Forest Edge)", sourceType: "spring", latitude: 30.176742, longitude: 78.690932, village: "Unchar", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Waterfall (Roadside, near Forest Edge)" },
+  { _id: "local-khanda-2", name: "Khanda Waterfall Site (A)", sourceType: "spring", latitude: 30.167947, longitude: 78.684328, village: "Khanda", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Waterfall Site" },
+  { _id: "local-khanda-3", name: "Khanda Waterfall Site (B)", sourceType: "spring", latitude: 30.168372, longitude: 78.684628, village: "Khanda", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Waterfall Site" },
+  { _id: "local-pauri-buakhal-2", name: "Pauri Buakhal Road Upar-02", sourceType: "spring", latitude: 30.120000, longitude: 78.790000, village: "Pauri", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Buakhal road upar", tds: 20, ec: 40, turbidity: 1, alkalinity: 26, acidity: 16, hardness: 28, chlorides: 12 },
+  { _id: "local-pauri-buakhal-3", name: "Pauri Buakhal Road Upar-03", sourceType: "spring", latitude: 30.120000, longitude: 78.791360, village: "Pauri", district: "Pauri Garhwal", state: "Uttarakhand", notes: "Buakhal road upar", tds: 20, ec: 40, turbidity: 1, alkalinity: 24, acidity: 28, hardness: 20, chlorides: 4 },
 
+];
 const GALLERY_PHOTOS = [
+  // ── existing ──
   { src: "/res1.png", title: "Kanda Water Source", caption: "Kanda, Uttarakhand — natural spring, 30.1667° N, 78.6733° E" },
   { src: "/res2.png", title: "Unchar Water Source", caption: "Unchar, Uttarakhand — natural waterfall, 30.1766° N, 78.6907° E" },
-  { src: "/res3.png", title: "Praniya Walla Spring", caption: "Praniya Walla, Uttarakhand — natural spring, 30.1910° N, 78.6847° E" },
-  { src: "/unchar-waterfall-a.jpg", title: "Unchar Waterfall Source A", caption: "Unchar, Uttarakhand — natural waterfall, 30.1806° N, 78.6842° E" },
-  { src: "/kandol-gaon-temple.jpg", title: "Kandol Gaon Temple Source", caption: "Kandol Gaon, Uttarakhand — natural spring near temple, 30.1668° N, 78.6777° E" },
-  { src: "/dandapani-source.jpg", title: "Dandapani Water Source", caption: "Dandapani, Uttarakhand — natural waterfall / spring, 30.1722° N, 78.6895° E" },
-];
+  { src: "/res3.png", title: "Praniya Walla Spring", caption: "Praniya Walla, Uttarakhand — natural spring, 30.1909° N, 78.6847° E" },
+  { src: "/unchar-waterfall-a.jpg", title: "Unchar Water Channel (Roadside, Lower Point)", caption: "Unchar, Uttarakhand — water channel, 30.1806° N, 78.6842° E" },
+  { src: "/dandapani-source.jpg", title: "Dandapani Forest Stream Site", caption: "Dandapani, Uttarakhand — forest stream, 30.1722° N, 78.6895° E" },
 
+  // ── new (27) ──
+  { src: "/Dandapani _1.jpg", title: "Dandapani Forest Stream (View 1)", caption: "Dandapani, Uttarakhand — forest stream, 30.1722° N, 78.6895° E" },
+  { src: "/Dandapani _2.jpg", title: "Dandapani Forest Stream (View 2)", caption: "Dandapani, Uttarakhand — forest stream, 30.1722° N, 78.6895° E" },
+  { src: "/Kandol Gaon.jpg", title: "Kandol Gaon Stone Water Spout (View 1)", caption: "Kandol Gaon, Uttarakhand — stone water spout, 30.1660° N, 78.6769° E" },
+  { src: "/Kandol Gaon_1.jpg", title: "Kandol Gaon Stone Water Spout (View 2)", caption: "Kandol Gaon, Uttarakhand — stone water spout, 30.1660° N, 78.6769° E" },
+  { src: "/Kandol Gaon _2.jpg", title: "Kandol Gaon Stone Water Spout (View 3)", caption: "Kandol Gaon, Uttarakhand — stone water spout, 30.1659° N, 78.6768° E" },
+  { src: "/khanda.jpg", title: "Khanda Vegetation / Slope Site (View 1)", caption: "Khanda, Uttarakhand — vegetation / slope site, 30.1698° N, 78.6871° E" },
+  { src: "/khanda_1.jpg", title: "Khanda Vegetation / Slope Site (View 2)", caption: "Khanda, Uttarakhand — vegetation / slope site, 30.1698° N, 78.6871° E" },
+  { src: "/khanda_2.jpg", title: "Khanda Waterfall Site (A)", caption: "Khanda, Uttarakhand — waterfall site, 30.1679° N, 78.6843° E" },
+  { src: "/khanda_3.jpg", title: "Khanda Waterfall Site (B)", caption: "Khanda, Uttarakhand — waterfall site, 30.1684° N, 78.6846° E" },
+  { src: "/Khar kota.jpg", title: "Khar Kota Forest Stream (View 1)", caption: "Khar Kota, Uttarakhand — forest stream, 30.1361° N, 78.7727° E" },
+  { src: "/Khar kota_1.jpg", title: "Khar Kota Forest Stream (View 2)", caption: "Khar Kota, Uttarakhand — forest stream, 30.1362° N, 78.7726° E" },
+  { src: "/Pauri – road side stream.jpg", title: "Pauri Road Side Stream (View 1)", caption: "Pauri, Uttarakhand — road side stream, 30.1210° N, 78.7908° E" },
+  { src: "/Pauri – road side stream_1.jpg", title: "Pauri Road Side Stream (View 2)", caption: "Pauri, Uttarakhand — road side stream, 30.1201° N, 78.7914° E" },
+  { src: "/Qurali.jpg", title: "Qurali Forest Stream Site", caption: "Qurali, Uttarakhand — forest stream, 30.1516° N, 78.6191° E" },
+  { src: "/Site 2 – Waterfall (Roadside, near Forest Edge).jpg", title: "Unchar Waterfall (Near Forest Edge)", caption: "Unchar, Uttarakhand — waterfall, roadside near forest edge, 30.1767° N, 78.6909° E" },
+  { src: "/Site 3 – Waterfall (Plus Code 5MHP+QM3).jpg", title: "Unchar Waterfall (Plus Code)", caption: "Unchar, Uttarakhand — waterfall, 30.1787° N, 78.6881° E" },
+  { src: "/Site4_1.jpg", title: "Unchar Spring / Water Channel (View 1)", caption: "Unchar, Uttarakhand — spring / water channel, 30.1790° N, 78.6876° E" },
+  { src: "/Site4_2.jpg", title: "Unchar Spring / Water Channel (View 2)", caption: "Unchar, Uttarakhand — spring / water channel, 30.1790° N, 78.6876° E" },
+  { src: "/Site4_3.jpg", title: "Unchar Spring / Water Channel (View 3)", caption: "Unchar, Uttarakhand — spring / water channel, 30.1790° N, 78.6875° E" },
+  { src: "/Site5_1.jpg", title: "Unchar Water Channel (Lower Point, View 1)", caption: "Unchar, Uttarakhand — water channel, roadside lower point, 30.1806° N, 78.6842° E" },
+  { src: "/Site5_2.jpg", title: "Unchar Water Channel (Lower Point, View 2)", caption: "Unchar, Uttarakhand — water channel, roadside lower point, 30.1806° N, 78.6842° E" },
+  { src: "/Toli _1.jpg", title: "Toli Road Side Stream", caption: "Toli, Uttarakhand — road side stream, 30.0374° N, 78.7928° E" },
+  { src: "/Ujiyari.jpg", title: "Ujiyari Stream Site", caption: "Ujiyari, Uttarakhand — stream site, 30.1560° N, 78.7398° E" },
+  { src: "/Uncha.jpg", title: "Unchar Waterfall (Roadside, Upper Point)", caption: "Unchar, Uttarakhand — waterfall, roadside upper point, 30.1766° N, 78.6908° E" },
+  { src: "/Unchar – forest stream site 1.jpg", title: "Unchar Forest Stream (Site 1)", caption: "Unchar, Uttarakhand — forest stream, 30.1805° N, 78.6841° E" },
+  { src: "/Unchar – forest stream site_2.jpg", title: "Unchar Forest Stream (Site 2)", caption: "Unchar, Uttarakhand — forest stream, 30.1788° N, 78.6881° E" },
+  { src: "/Unchar – forest stream site3.jpg", title: "Unchar Forest Stream (Site 3)", caption: "Unchar, Uttarakhand — forest stream, 30.1766° N, 78.6907° E" },
+];
 const TILE_SIZE = 256;
 const INDIA_CENTER = { latitude: 22.5937, longitude: 78.9629 };
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
@@ -131,34 +165,66 @@ function formatSearchResult(item) {
     longitude: Number(item.lon),
   };
 }
-
+function isDataComplete(source) {
+  const requiredFields = ["tds", "ec", "turbidity", "alkalinity", "acidity", "hardness", "chlorides"];
+  return requiredFields.every(
+    (key) => source[key] !== undefined && source[key] !== null && source[key] !== ""
+  );
+}
 function detailFields(source) {
   const { latitude, longitude } = sourceCoords(source);
-  return [
-    ["ID", source._id || source.id || "N/A"],
+  
+  // We remove the "N/A" fallbacks so we can check if they are actually empty
+  const fields = [
+    ["ID", source._id || source.id],
     ["Name", source.name || "Unnamed source"],
-    ["Latitude", Number.isFinite(latitude) ? latitude.toFixed(6) : "N/A"],
-    ["Longitude", Number.isFinite(longitude) ? longitude.toFixed(6) : "N/A"],
-    ["pH", source.ph ?? "N/A"],
-    ["Source Type", source.sourceType || "N/A"],
-    ["Village", source.village || "N/A"],
-    ["District", source.district || "N/A"],
-    ["State", source.state || "N/A"],
-    ["Potable", source.isPotable == null ? "N/A" : source.isPotable ? "Yes" : "No"],
-    ["Seasonal", source.seasonal == null ? "N/A" : source.seasonal ? "Yes" : "No"],
-    ["Users / Day", source.usersPerDay ?? "N/A"],
-    ["Condition", source.condition || "N/A"],
-    ["Quality Status", source.qualityStatus || "N/A"],
-    ["Address", source.address || "N/A"],
-    ["Notes", source.notes || "N/A"],
-    ["Created At", source.createdAt ? new Date(source.createdAt).toLocaleString() : "N/A"],
+    ["Latitude", Number.isFinite(latitude) ? latitude.toFixed(6) : null],
+    ["Longitude", Number.isFinite(longitude) ? longitude.toFixed(6) : null],
+    ["Village", source.village],
+    ["District", source.district],
+    ["State", source.state],
+    ["pH", source.ph],
+    ["Total Dissolved Solids (mg/L)", source.tds],
+    ["Electrical Conductivity (µS/cm)", source.ec],
+    ["Turbidity (NTU)", source.turbidity],
+    ["Total Alkalinity (mg/L)", source.alkalinity],
+    ["Total Acidity (mg/L)", source.acidity],
+    ["Total Hardness (mg/L)", source.hardness],
+    ["Chlorides (mg/L)", source.chlorides],
+    ["Notes", source.notes],
   ];
+
+  // This automatically hides any row that doesn't have data!
+  return fields.filter(
+    ([label, value]) => value !== undefined && value !== null && value !== "" && value !== "N/A"
+  );
 }
 
 function mergeSources(apiSources = []) {
   const existingNames = new Set(apiSources.map((s) => s?.name?.trim().toLowerCase()).filter(Boolean));
   const extras = LOCAL_WATER_SOURCES.filter((s) => !existingNames.has(s.name.trim().toLowerCase()));
-  return [...apiSources, ...extras];
+  
+  const combined = [...apiSources, ...extras];
+
+  // Calculate how much information each source has
+  const getScore = (source) => {
+    let score = 0;
+    const detailsToCheck = [
+      "village", "district", "state", "notes", "tds", "ec", 
+      "turbidity", "alkalinity", "acidity", "hardness", "chlorides", "ph"
+    ];
+    
+    detailsToCheck.forEach((key) => {
+      // If the detail exists and isn't empty, increase its score!
+      if (source[key] !== undefined && source[key] !== null && source[key] !== "") {
+        score += 1;
+      }
+    });
+    return score;
+  };
+
+  // Sort them so the highest score (most details) is at the top!
+  return combined.sort((a, b) => getScore(b) - getScore(a));
 }
 
 async function request(path, { token, timeoutMs = 15000, ...options } = {}) {
@@ -269,26 +335,32 @@ export default function App() {
     return result;
   }, [query, sources, filterState, filterDistrict, filterType]);
 
-  const tileLayout = useMemo(() => {
-    const zoom = mapView.zoom;
+    const tileLayout = useMemo(() => {
+    const zoom = mapView.zoom; // fractional — used for smooth positioning
+    const tileZoom = Math.max(0, Math.min(19, Math.round(zoom))); // integer — used for image requests
+    const scale = 2 ** (zoom - tileZoom);
+    const scaledTileSize = TILE_SIZE * scale;
+
     const center = latLngToWorld(mapView.latitude, mapView.longitude, zoom);
     const left = center.x - mapSize.width / 2;
     const top = center.y - mapSize.height / 2;
-    const minX = Math.floor(left / TILE_SIZE);
-    const maxX = Math.floor((left + mapSize.width) / TILE_SIZE);
-    const minY = Math.floor(top / TILE_SIZE);
-    const maxY = Math.floor((top + mapSize.height) / TILE_SIZE);
-    const worldTiles = 2 ** zoom;
+
+    const minX = Math.floor(left / scaledTileSize);
+    const maxX = Math.floor((left + mapSize.width) / scaledTileSize);
+    const minY = Math.floor(top / scaledTileSize);
+    const maxY = Math.floor((top + mapSize.height) / scaledTileSize);
+    const worldTiles = 2 ** tileZoom;
     const tiles = [];
     for (let x = minX; x <= maxX; x++) {
       for (let y = minY; y <= maxY; y++) {
         if (y < 0 || y >= worldTiles) continue;
         const wrappedX = ((x % worldTiles) + worldTiles) % worldTiles;
         tiles.push({
-          key: `${zoom}-${x}-${y}`,
-          src: `https://tile.openstreetmap.org/${zoom}/${wrappedX}/${y}.png`,
-          left: x * TILE_SIZE - left,
-          top: y * TILE_SIZE - top,
+          key: `${tileZoom}-${x}-${y}`,
+          src: `https://tile.openstreetmap.org/${tileZoom}/${wrappedX}/${y}.png`,
+          left: x * scaledTileSize - left,
+          top: y * scaledTileSize - top,
+          size: scaledTileSize,
         });
       }
     }
@@ -333,26 +405,33 @@ export default function App() {
     localStorage.removeItem(STORAGE_USER);
   }, []);
 
-  const loadSources = useCallback(async (district = "") => {
+    const loadSources = useCallback(async (district = "") => {
     setSourcesBusy(true);
     setSourcesError("");
     try {
-      const path = district
-        ? `/water-sources?district=${encodeURIComponent(district)}`
-        : "/water-sources";
+      let path = "/water-sources";
+      if (district) {
+        path += `?district=${encodeURIComponent(district)}`;
+      }
       const data = await request(path);
       const apiSources = Array.isArray(data) ? data : data?.data || [];
-      const combined = mergeSources(apiSources);
+      
+      // SPAM FILTER: Hides specific garbage names, keeps good data safe
+      const badNames = ["pauri ka paani", "rohit", "test source 6", "lalalilo", "uttarkashi ke paas"];
+      const cleanApiSources = apiSources.filter((source) => {
+        return !badNames.includes(source.name.toLowerCase().trim());
+      });
+
+      const combined = mergeSources(cleanApiSources);
+      
       const visible = district
         ? combined.filter((s) => (s.district || "").trim().toLowerCase() === district.trim().toLowerCase())
         : combined;
+        
       setSources(visible);
     } catch (error) {
-      const fallback = district
-        ? LOCAL_WATER_SOURCES.filter((s) => (s.district || "").trim().toLowerCase() === district.trim().toLowerCase())
-        : LOCAL_WATER_SOURCES;
-      setSources(fallback);
-      setSourcesError(cleanError(error, "Failed to load sources"));
+      console.error(error);
+      setSourcesError("Failed to load sources");
     } finally {
       setSourcesBusy(false);
     }
@@ -609,10 +688,10 @@ export default function App() {
 
   function endMapDrag() { window.setTimeout(() => { dragRef.current = null; }, 0); }
 
-  function zoomMap(delta, anchor) {
+        function zoomMap(delta, anchor) {
     setMapTouched(true);
     setMapView((current) => {
-      const nextZoom = Math.max(3, Math.min(18, current.zoom + delta));
+      const nextZoom = Math.max(3, Math.min(19, current.zoom + delta));
       if (nextZoom === current.zoom) return current;
       if (!anchor) return { ...current, zoom: nextZoom };
       const centerWorld = latLngToWorld(current.latitude, current.longitude, current.zoom);
@@ -936,7 +1015,15 @@ export default function App() {
                 >
                   <div className="tile-layer">
                     {tileLayout.tiles.map((tile) => (
-                      <img alt="" className="map-tile" draggable="false" key={tile.key} src={tile.src} style={{ left: tile.left, top: tile.top }} />
+                      <img
+                        alt=""
+                        className="map-tile"
+                        draggable="false"
+                        key={tile.key}
+                        src={tile.src}
+                        style={{ left: tile.left, top: tile.top, width: tile.size, height: tile.size }}
+                        onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
+                      />
                     ))}
                   </div>
                   {sourcesBusy && <div className="loading-pill">Loading sources…</div>}
@@ -1001,10 +1088,9 @@ export default function App() {
                       <th>Type</th>
                       <th>Village</th>
                       <th>District</th>
-                      <th>State</th>
+                       <th>State</th>
                       <th>Latitude</th>
                       <th>Longitude</th>
-                      <th>Notes</th>
                       <th>Details</th>
                     </tr>
                   </thead>
@@ -1033,10 +1119,12 @@ export default function App() {
                             <td style={{ color: "var(--text-2)", fontWeight: 500 }}>
                               {i + 1}
                             </td>
-                            <td>
-                              <strong style={{ color: "var(--text)" }}>
-                                {source.name || "Unnamed"}
-                              </strong>
+                                                        <td>
+                              <div style={{ display: "flex", alignItems: "center", gap: "7px", flexWrap: "wrap" }}>
+                                <strong style={{ color: "var(--text)" }}>
+                                  {source.name || "Unnamed"}
+                                </strong>
+                              </div>
                             </td>
                             <td>
                               <span
@@ -1055,17 +1143,20 @@ export default function App() {
                             <td style={{ fontFamily: "monospace", fontSize: 12 }}>
                               {Number.isFinite(latitude) ? latitude.toFixed(5) : "—"}
                             </td>
-                            <td style={{ fontFamily: "monospace", fontSize: 12 }}>
+                             <td style={{ fontFamily: "monospace", fontSize: 12 }}>
                               {Number.isFinite(longitude) ? longitude.toFixed(5) : "—"}
                             </td>
-                            <td style={{ color: "var(--text-2)" }}>
-                              {source.notes || "—"}
-                            </td>
                             <td>
-                              <button
+
+                            <button
                                 className="source-details-btn"
                                 onClick={() => setSelectedSource(source)}
                                 type="button"
+                                style={isDataComplete(source) ? {
+                                  background: "#dcfce7",
+                                  borderColor: "#86efac",
+                                  color: "#15803d",
+                                } : {}}
                               >
                                 View Details →
                               </button>
@@ -1230,29 +1321,32 @@ export default function App() {
           </div>
 
           <h3 className="contribution-heading">Principal Investigators &amp; Project Leadership</h3>
-          <div className="contribution-team-list">
-            <div className="contribution-member">
-              <span className="member-role">Principal Investigator</span>
-              <strong>Dr. Pushkar Praveen</strong>
-              <span>Assistant Professor</span>
-              <span>Department of Electronics &amp; Communication Engineering</span>
-              <span>G.B. Pant Institute of Engineering &amp; Technology, Uttarakhand</span>
-            </div>
-            <div className="contribution-member">
-              <span className="member-role">Co-Principal Investigator</span>
-              <strong>Dr. Agya Ram Verma</strong>
-              <span>Assistant Professor</span>
-              <span>Department of Electronics &amp; Communication Engineering</span>
-              <span>G.B. Pant Institute of Engineering &amp; Technology, Uttarakhand</span>
-            </div>
-            <div className="contribution-member">
-              <span className="member-role">Co-Principal Investigator</span>
-              <strong>Dr. Papendra Kumar</strong>
-              <span>Assistant Professor</span>
-              <span>Department of Computer Science &amp; Engineering</span>
-              <span>G.B. Pant Institute of Engineering &amp; Technology, Uttarakhand</span>
-            </div>
-          </div>
+<div className="contribution-team-list">
+  <div className="contribution-member">
+    <span className="member-role">Principal Investigator</span>
+    <img src="\pushkar_praveen.png" alt="Dr. Pushkar Praveen" className="member-photo" />
+    <strong>Dr. Pushkar Praveen</strong>
+    <span>Assistant Professor</span>
+    <span>Department of Electronics &amp; Communication Engineering</span>
+    <span>G.B. Pant Institute of Engineering &amp; Technology, Uttarakhand</span>
+  </div>
+  <div className="contribution-member">
+    <span className="member-role">Co-Principal Investigator</span>
+    <img src="/ar_verma.jpeg" alt="Dr. Agya Ram Verma" className="member-photo" />
+    <strong>Dr. Agya Ram Verma</strong>
+    <span>Assistant Professor</span>
+    <span>Department of Electronics &amp; Communication Engineering</span>
+    <span>G.B. Pant Institute of Engineering &amp; Technology, Uttarakhand</span>
+  </div>
+  <div className="contribution-member">
+    <span className="member-role">Co-Principal Investigator</span>
+    <img src="/papendra_kumar.jpeg" alt="Dr. Papendra Kumar" className="member-photo" />
+    <strong>Dr. Papendra Kumar</strong>
+    <span>Assistant Professor</span>
+    <span>Department of Computer Science &amp; Engineering</span>
+    <span>G.B. Pant Institute of Engineering &amp; Technology, Uttarakhand</span>
+  </div>
+</div>
 
           <h3 className="contribution-heading">Project Implementation Team</h3>
           <div className="contribution-team-list">

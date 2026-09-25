@@ -1644,8 +1644,8 @@ body {
 
 #contributions .leadership-image {
   flex-shrink: 0;
-  width: 84px;
-  height: 84px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   overflow: hidden;
   border: 3px solid var(--brand-light);
@@ -1700,6 +1700,15 @@ body {
   background: var(--surface);
   box-shadow: var(--shadow);
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.member-photo {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+  border: 3px solid var(--brand-light);
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
 }
 #contributions .contribution-member:hover {
   transform: translateY(-2px);
