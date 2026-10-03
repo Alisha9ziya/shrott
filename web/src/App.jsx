@@ -101,7 +101,17 @@ const GALLERY_PHOTOS = [
   { src: "/Unchar – forest stream site 1.jpg", title: "Unchar Forest Stream (Site 1)", caption: "Unchar, Uttarakhand — forest stream, 30.1805° N, 78.6841° E" },
   { src: "/Unchar – forest stream site_2.jpg", title: "Unchar Forest Stream (Site 2)", caption: "Unchar, Uttarakhand — forest stream, 30.1788° N, 78.6881° E" },
   { src: "/Unchar – forest stream site3.jpg", title: "Unchar Forest Stream (Site 3)", caption: "Unchar, Uttarakhand — forest stream, 30.1766° N, 78.6907° E" },
+  { src: "/source1.jpg", title: "Water Source 1", caption: "Pauri Garhwal, Uttarakhand — water source" },
+  { src: "/source2.jpg", title: "Water Source 2", caption: "Pauri Garhwal, Uttarakhand — water source" },
+  { src: "/source3.jpg", title: "Water Source 3", caption: "Pauri Garhwal, Uttarakhand — water source" },
+  { src: "/mam.jpg", title: "Field Visit", caption: "Pauri Garhwal, Uttarakhand — field visit" },
 ];
+
+const SOURCE_IMAGES = {
+  "local-unchar-1": ["/source1.jpg"],
+  "local-unchar-2": ["/source2.jpg"],
+  "local-unchar-3": ["/source3.jpg"],
+};
 const TILE_SIZE = 256;
 const INDIA_CENTER = { latitude: 22.5937, longitude: 78.9629 };
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
@@ -808,14 +818,14 @@ export default function App() {
 </div>
         <div className="navbar-links">
           {[
-            ["home", "Home"],
-["about", "About"],
-["resources", "Map View"],
-["sources-list", "Water Sources"],
-["contributions", "Research Team"],
-["gallery", "Gallery"],
-["contact", "Contact & Support"],
-          ].map(([id, label]) => (
+  ["home", "Home"],
+  ["about", "About"],
+  ["sources-list", "Water Sources"],
+  ["resources", "Map View"],
+  ["contributions", "Research Team"],
+  ["gallery", "Gallery"],
+  ["contact", "Contact & Support"],
+].map(([id, label]) => (
             <button
               className={`nav-link${activeSection === id ? " active" : ""}`}
               key={id}
@@ -894,7 +904,7 @@ export default function App() {
 
     <div className="home-detail-copy">
       <p>
-        A one-year research project focused on the sustainable management of
+        A  research project focused on the sustainable management of
         water resources and the resilience of Himalayan communities and
         downstream areas in Uttarakhand.
       </p>
@@ -1409,6 +1419,16 @@ export default function App() {
                 <button className="modal-close-btn" onClick={() => setSelectedSource(null)} type="button">✕</button>
               </div>
             </div>
+                        {activeSection === "sources-list" &&
+              (SOURCE_IMAGES[selectedSource._id] || []).map((src) => (
+                <img
+                  key={src}
+                  src={src}
+                  alt={selectedSource.name}
+                  style={{ width: "100%", maxHeight: 260, objectFit: "cover", borderRadius: 12, marginBottom: 14 }}
+                />
+              ))}
+            
             <div className="detail-grid">
               {detailFields(selectedSource).map(([label, value]) => (
                 <div className="detail-row" key={label}>
